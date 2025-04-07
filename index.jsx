@@ -1,27 +1,29 @@
-import { createRoot } from "react-dom/client";
-import App from './App';
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import CountryDetail from "./components/CountryDetail";
-import Home from "./components/Home";
+import { createRoot } from 'react-dom/client'
+import App from './App'
+import { createBrowserRouter, RouterProvider } from 'react-router-dom'
+import Contact from './components/Contact'
+import Home from './components/Home'
+import Error from './components/Error'
+import CountryDetail from './components/CountryDetail'
 
-// Create the router with paths and components
 const router = createBrowserRouter([
   {
-    path: "/",
+    path: '/',
     element: <App />,
+    errorElement: <Error />,
     children: [
       {
-        path: "/",
-        element: <Home />, // This will be shown at the root of App
+        path: '/',
+        element: <Home />,
       },
       {
-        path: "/:country", // This will match any country name dynamically
+        path: '/:country',
         element: <CountryDetail />,
       },
     ],
   },
-]);
+])
 
-// Initialize ReactDOM with the router provider
-const root = createRoot(document.querySelector('#root'));
-root.render(<RouterProvider router={router} />);
+const root = createRoot(document.querySelector('#root'))
+
+root.render(<RouterProvider router={router} />)
