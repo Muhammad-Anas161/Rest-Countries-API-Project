@@ -1,16 +1,22 @@
+import { useTheme } from "../hooks/useTheme"
+
 export default function Header() {
+  const [isDark, setIsDark] =  useTheme()
+  
   return (
-    <header>
-  <div className="header-content">
-    <h2 className="title">
-      <a href="./index.html">Where in the world?</a>
-    </h2>
-    <p className="icon">
-      <i className="fa-regular fa-moon" aria-hidden="true" />
-      <i className="fa-solid fa-moon" aria-hidden="true" />
-      &nbsp;&nbsp;Dark Mode
-    </p>
-  </div>
-</header>
+    <header className={`header-container ${isDark? 'dark': ''}`}>
+      <div className="header-content">
+        <h2 className="title">
+          <a href="/">Where in the world?</a>
+        </h2>
+        <p className="theme-changer" onClick={() => {
+          setIsDark(!isDark)
+          localStorage.setItem('isDarkMode', !isDark)
+        }}>
+          <i className={`fa-solid fa-${isDark ? 'sun': 'moon'}` }/>
+          &nbsp;&nbsp;{isDark? 'Light': 'Dark'} Mode
+        </p>
+      </div>
+    </header>
   )
 }

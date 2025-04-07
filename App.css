@@ -24,18 +24,30 @@ body{
     font-family: nunito, sans-serif;
 }
 
-body.dark-mode{
-    --elements-color: hsl(209, 23%, 22%);
-    --background-color: hsl(207, 26%, 17%);
-    --text-color: hsl(0, 0%, 100%);
-    color: var(--text-color);
+main, header {
     background-color: var(--background-color);
+    color: var(--text-color);
 }
+
+main.dark, header.dark {
+    --background-color: hsl(207, 26%, 17%); 
+    --text-color: white;
+    --elements-color: hsl(209, 23%, 22%);
+}
+
+main {
+    padding: 24px;
+    min-height: calc(100vh - 32px);
+}
+
 
 header{
     box-shadow: 0 8px 8px 0px #0000008e;
     padding-inline: 24px;
     background-color: var(--elements-color);
+    position: sticky;
+    top: 0;
+    z-index: 1;
 }
 
 .header-content{
@@ -47,6 +59,10 @@ header{
 }
 .title{
     font-weight: 800;
+}
+
+.fa-solid.fa-moon{
+    display: inline !important;
 }
 
 main{

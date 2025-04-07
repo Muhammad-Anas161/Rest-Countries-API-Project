@@ -1,75 +1,83 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState } from 'react'
+
 import './CountryDetail.css'
-import { Link, useParams } from "react-router-dom";
+import { Link, useLocation, useParams } from 'react-router-dom'
+import { useTheme } from '../hooks/useTheme'
+import CountryDetailShimmer from './CountryDetailShimmer'
 
 export default function CountryDetail() {
-  const countryName = useParams().country;
-  const [countryData, setCountryData] = useState(null);
-  const [error, setError] = useState(null);
+  const [isDark] = useTheme()
+  const params = useParams()
+  const { state } = useLocation()
+  const countryName = params.country
+
+  const [countryData, setCountryData] = useState(null)
+  const [notFound, setNotFound] = useState(false)
+
+  function updateCountryData(country) {
+      setCountryData({
+        name: country.name.common || country.name,
+        nativeName: Object.values(country.name.nativeName || {})[0]?.common,
+        population: country.population,
+        region: country.region,
+        subregion: country.subregion,
+        capital: country.capital,
+        flag: country.flags.svg,
+        tld: country.tld,
+        languages: Object.values(country.languages || {}).join(', '),
+        currencies: Object.values(country.currencies || {})
+          .map((currency) => currency.name)
+          .join(', '),
+        borders: [],
+      })
+  
+      if (!country.borders) {
+        country.borders = []
+      }
+  
+      Promise.all(
+        country.borders.map((border) => {
+          return fetch(`https://restcountries.com/v3.1/alpha/${border}`)
+            .then((res) => res.json())
+            .then(([borderCountry]) => borderCountry.name.common)
+        })
+      ).then((borders) => {
+        setTimeout(() =>
+          setCountryData((prevState) => ({ ...prevState, borders }))
+        )
+      })
+    }
+  
 
   useEffect(() => {
+    if (state) {
+      updateCountryData(state)
+      return
+    }
+
     fetch(`https://restcountries.com/v3.1/name/${countryName}?fullText=true`)
-      .then(response => response.json())
+      .then((res) => res.json())
       .then(([country]) => {
-        console.log(country);
-
-        setCountryData({
-          name: country.name.common,
-          flag: country.flags.svg,
-          nativeName: Object.values(country.name.nativeName)[0].official,
-          population: country.population,
-          region: country.region,
-          subregion: country.subregion,
-          capital: country.capital,
-          tld: country.tld,
-          currenciesName: Object.values(country.currencies)[0].name,
-          currenciesSybmol: Object.values(country.currencies)[0].symbol,
-          languages: Object.values(country.languages).join(", "),
-          borders: country.borders || [], // Default to empty array if no borders
-        });
-
-        // Fetch border countries only if borders exist
-        if (country.borders?.length > 0) {
-          Promise.all(
-            country.borders.map(border =>
-              fetch(`https://restcountries.com/v3.1/alpha/${border}`)
-                .then(res => res.json())
-                .then(([borderCountry]) => borderCountry.name.common)
-                .catch(err => {
-                  console.error(`Error fetching border country ${border}: `, err);
-                  return null; // Return null if there's an error
-                })
-            )
-          )
-            .then(borders => {
-              // Filter out any null values (in case fetch failed for some borders)
-              setCountryData(prev => ({
-                ...prev,
-                borders: borders.filter(border => border !== null),
-              }));
-            })
-            .catch(err => {
-              console.error("Failed to fetch border countries", err);
-              setError("Failed to fetch border countries.");
-            });
-        }
+        updateCountryData(country)
       })
-      .catch(err => {
-        console.error("Failed to fetch country data", err);
-        setError("Failed to fetch country data.");
-      });
-  }, [countryName]);
+      .catch((err) => {
+        console.log(err)
+        setNotFound(true)
+      })
+  }, [countryName])
 
-  // Show error message if any error occurred
-  if (error) return <div className="error-message">❌ {error}</div>;
-
-  if (!countryData) return <div>Loading...</div>;
-
+  if (notFound) {
+    return <div>Country Not Found</div>
+  }
   return (
-    <div className="country-details-container">
-      <span className="back-btn" onClick={() => window.history.back()}>
+    <main className={`${isDark ? 'dark' : ''}`}>
+      <div className="country-details-container">
+      <span className="back-btn" onClick={() => history.back()}>
         <i className="fa-solid fa-arrow-left"></i>&nbsp;&nbsp;Back
       </span>
+      {countryData === null ? (
+          <CountryDetailShimmer />
+        ) : (
       <div className="country-details">
         <img src={countryData.flag} alt="" className="flag" />
         <div className="country-content">
@@ -77,7 +85,7 @@ export default function CountryDetail() {
           <div className="text">
             <div className="left">
               <p>
-                <b>Native Name:</b> <span className="native-name">{countryData.nativeName}</span>
+                <b>Native Name:</b> <span className="native-name">{countryData.nativeName || countryData.name}</span>
               </p>
               <p>
                 <b>Population:</b> <span className="population">{countryData.population.toLocaleString("en-PK")}</span>
@@ -120,6 +128,8 @@ export default function CountryDetail() {
           )}
         </div>
       </div>
+        )}
     </div>
+    </main>
   );
 }

@@ -17,14 +17,7 @@
       background-color: var(--background-color);
       font-family: nunito, sans-serif;
   }
-  
-  body.dark-mode{
-      --elements-color: hsl(209, 23%, 22%);
-      --background-color: hsl(207, 26%, 17%);
-      --text-color: hsl(0, 0%, 100%);
-      color: var(--text-color);
-      background-color: var(--background-color);
-  }
+
   
   header {
     box-shadow: 0 2px 4px 0px #0000003a;
